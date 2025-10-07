@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import quizapp.composeapp.generated.resources.Res
-import quizapp.composeapp.generated.resources.compose_multiplatform
 import quizapp.composeapp.generated.resources.ic_trophy
 
 @Composable
