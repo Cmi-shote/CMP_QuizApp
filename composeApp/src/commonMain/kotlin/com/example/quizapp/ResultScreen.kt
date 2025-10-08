@@ -13,23 +13,44 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 import quizapp.composeapp.generated.resources.Res
 import quizapp.composeapp.generated.resources.ic_trophy
 
+class ResultScreenNav : Screen {
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.current
+        ResultScreen(
+            onFinish = {
+                navigator?.popUntilRoot()
+            }
+        )
+    }
+}
+
 @Composable
 fun ResultScreen(
-    username: String = "Username",
-    score: String = "Your Score is 10 out of 10",
+    viewModel: QuizViewModel = koinViewModel(),
     onFinish: () -> Unit = {}
 ) {
+    val score by viewModel.score.collectAsState()
+    val totalQuestions = viewModel.questions.value.size
+    val scoreText = "Your Score is $score out of $totalQuestions"
+    val username by viewModel.name.collectAsState()
+
     Box(modifier = Modifier.fillMaxSize()) {
         GradientBackground()
         Column(
@@ -71,7 +92,7 @@ fun ResultScreen(
             )
 
             Text(
-                text = score,
+                text = scoreText,
                 color = Color.LightGray, // Using Gray as approximation for secondary_text_dark
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,

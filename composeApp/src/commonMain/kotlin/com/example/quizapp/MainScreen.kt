@@ -27,7 +27,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
 import org.jetbrains.compose.ui.tooling.preview.Preview
+
+class MainScreenNav : Screen {
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.current
+        MainScreen(
+            onStart = { name ->
+                navigator?.push(QuizQuestionsScreenNav(name = name))
+            }
+        )
+    }
+}
 
 @Composable
 fun MainScreen(
@@ -86,7 +100,7 @@ fun MainScreen(
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text("e.g John") },
+                        placeholder = { Text("e.g John") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 20.dp),
