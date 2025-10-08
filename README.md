@@ -56,7 +56,7 @@ Select the iOS configuration and click Run
 ## API
 This app consumes data from the REST Countries API using Ktor for network requests.
 Endpoint used:
-[flags](https://restcountries.com/v3.1/all?fields=name,flags)
+[flags](https://restcountries.com/v3.1/all?fields=name,flags).
 The response provides each country’s name and flag.
 A helper function randomly selects 10 countries and generates single-choice options for questions like:
 “Which country does this flag belong to?”
