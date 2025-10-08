@@ -50,6 +50,9 @@ kotlin {
             implementation(libs.navigation.compose)
             implementation(libs.kamel.image)
             api(libs.koin.core)
+            implementation(libs.voyager.navigation)
+            implementation(libs.voyager.transitions)
+            implementation(libs.voyager.screenModel)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
