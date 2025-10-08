@@ -48,11 +48,11 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.lifecycle.viewmodel)
             implementation(libs.navigation.compose)
-            implementation(libs.kamel.image)
             api(libs.koin.core)
             implementation(libs.voyager.navigation)
             implementation(libs.voyager.transitions)
             implementation(libs.voyager.screenModel)
+            implementation(libs.bundles.coil)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
