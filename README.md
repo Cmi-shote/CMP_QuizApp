@@ -1,11 +1,11 @@
-# 🌍 Quiz App (Kotlin Multiplatform Project)
+# Quiz App (Kotlin Multiplatform Project)
 
 A cross-platform **Quiz App** built with **Kotlin Multiplatform (KMP)** — supporting **Android** and **iOS** from a single shared codebase.  
 Originally built with XML layouts on Android([Github](https://github.com/Cmi-shote/Quiz_App)), this new version leverages **Compose Multiplatform** to deliver a modern, scalable, and unified experience.
 
 ---
 
-## 📖 Overview
+## Overview
 
 The Quiz App allows users to test their knowledge on world flags, featuring:
 
@@ -16,7 +16,7 @@ The Quiz App allows users to test their knowledge on world flags, featuring:
 
 ---
 
-## 🧱 Tech Stack
+## Tech Stack
 
 ### Shared Module
 - **Kotlin Multiplatform** – Shared logic between Android and iOS  
@@ -56,7 +56,7 @@ Select the iOS configuration and click Run
 ## API
 This app consumes data from the REST Countries API using Ktor for network requests.
 Endpoint used:
-https://restcountries.com/v3.1/all?fields=name,flags
+[flags](https://restcountries.com/v3.1/all?fields=name,flags)
 The response provides each country’s name and flag.
 A helper function randomly selects 10 countries and generates single-choice options for questions like:
 “Which country does this flag belong to?”
