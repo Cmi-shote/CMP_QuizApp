@@ -1,35 +1,70 @@
-This is a Kotlin Multiplatform project targeting Android, iOS.
+# 🌍 Quiz App (Kotlin Multiplatform Project)
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
-
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
-
-### Build and Run Android Application
-
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
-
-### Build and Run iOS Application
-
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+A cross-platform **Quiz App** built with **Kotlin Multiplatform (KMP)** — supporting **Android** and **iOS** from a single shared codebase.  
+Originally built with XML layouts on Android([Github](https://github.com/Cmi-shote/Quiz_App)), this new version leverages **Compose Multiplatform** to deliver a modern, scalable, and unified experience.
 
 ---
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+## 📖 Overview
+
+The Quiz App allows users to test their knowledge on world flags, featuring:
+
+- Dynamic quiz questions fetched from a public REST API  
+- Real-time feedback on answers  
+- Clean, intuitive UI built with **Compose Multiplatform**  
+- Shared business logic and networking layer powered by **Ktor**
+
+---
+
+## 🧱 Tech Stack
+
+### Shared Module
+- **Kotlin Multiplatform** – Shared logic between Android and iOS  
+- **Ktor** – HTTP client for API requests  
+- **Koin** – Dependency Injection across modules  
+- **Coroutines** – Asynchronous programming  
+- **Kotlinx Serialization** – JSON parsing  
+- **Compose Multiplatform** – Declarative UI for Android & iOS  
+- **Coil 3** – Image loading  
+- **Voyager** – Navigation for Compose Multiplatform  
+
+---
+
+## Setup & Run
+
+### 1️⃣ Clone the Repository
+```bash
+git clone https://github.com/<your-username>/quizapp.git
+cd quizapp
+```
+
+### 2️⃣ Run on Android
+Open the project in Android Studio
+Select an emulator or a connected device
+Click Run
+### 3️⃣ Run on iOS
+You have two options:
+ - Option 1 – Using Xcode
+Open the iosApp folder in Xcode
+Select your target simulator or device
+Click Run
+ - Option 2 – Using Android Studio / IntelliJ IDEA
+Install the Kotlin Multiplatform Mobile (KMM) plugin
+Run the iOS app directly on the iOS Simulator from within the IDE
+Select the iOS configuration and click Run
+
+## API
+This app consumes data from the REST Countries API using Ktor for network requests.
+Endpoint used:
+https://restcountries.com/v3.1/all?fields=name,flags
+The response provides each country’s name and flag.
+A helper function randomly selects 10 countries and generates single-choice options for questions like:
+“Which country does this flag belong to?”
+
+
+## Key Features
+Cross-platform code sharing (Android + iOS)
+Modern declarative UI with Compose
+Clean architecture with DI (Koin)
+Image loading with Coil 3
+Smooth builds for both iOS and Android
