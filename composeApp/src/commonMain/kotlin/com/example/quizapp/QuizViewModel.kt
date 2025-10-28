@@ -119,4 +119,12 @@ class QuizViewModel(private val countryApiService: CountryApiService) : ViewMode
     fun updateName(name: String) {
         _name.value = name
     }
+
+    fun reset() {
+        _currentQuestionIndex.value = 0
+        _selectedOption.value = null
+        _score.value = 0
+        _name.value = ""
+        loadQuestions()
+    }
 }

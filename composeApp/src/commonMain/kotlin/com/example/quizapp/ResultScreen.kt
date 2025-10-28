@@ -36,6 +36,10 @@ class ResultScreenNav : Screen {
         ResultScreen(
             onFinish = {
                 navigator?.popUntilRoot()
+            },
+            onNext = {
+                navigator?.popUntilRoot()
+                navigator?.push(MainScreenNav())
             }
         )
     }
@@ -44,7 +48,8 @@ class ResultScreenNav : Screen {
 @Composable
 fun ResultScreen(
     viewModel: QuizViewModel = koinViewModel(),
-    onFinish: () -> Unit = {}
+    onFinish: () -> Unit = {},
+    onNext: () -> Unit = {}
 ) {
     val score by viewModel.score.collectAsState()
     val totalQuestions = viewModel.questions.value.size
@@ -100,7 +105,10 @@ fun ResultScreen(
             )
 
             Button(
-                onClick = onFinish,
+                onClick = {
+                    viewModel.reset()
+                    onNext()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 10.dp),
@@ -110,7 +118,7 @@ fun ResultScreen(
                 )
             ) {
                 Text(
-                    text = "Finish",
+                    text = "Next",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
