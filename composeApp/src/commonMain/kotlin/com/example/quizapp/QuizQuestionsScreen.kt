@@ -40,6 +40,12 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import coil3.compose.rememberAsyncImagePainter
+import com.example.quizapp.components.ActionButton
+import com.example.quizapp.components.EmptyState
+import com.example.quizapp.components.ErrorState
+import com.example.quizapp.components.FlagImage
+import com.example.quizapp.components.LoadingState
+import com.example.quizapp.util.getOptionColors
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import quizapp.composeapp.generated.resources.Res
@@ -64,142 +70,148 @@ fun QuizQuestionsScreen(
     viewModel: QuizViewModel = koinViewModel(),
     onQuizComplete: () -> Unit = {}
 ) {
-    val currentQuestion by viewModel.questions.collectAsState()
+    val questions by viewModel.questions.collectAsState()
     val currentIndex by viewModel.currentQuestionIndex.collectAsState()
-    val selectedOption by viewModel.selectedOption.collectAsState()
+    val selectedOption by viewModel.selectedOption.collectAsState(initial = null)
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
+    val isSubmitted by viewModel.isSubmitted.collectAsState(initial = false)
 
-    val question = currentQuestion.getOrNull(currentIndex)
+    val question = questions.getOrNull(currentIndex)
     val (progress, maxProgress) = viewModel.getProgress()
 
     LaunchedEffect(Unit) {
         viewModel.updateName(username)
     }
 
-    if (isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-    } else if (error != null) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = error!!, color = Color.Red)
-        }
-    } else if (question != null) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = question.question,
-                color = Color(0xFF363A43),
-                fontSize = 22.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-            )
-
-            // Load flag image using Kamel
-            Box(modifier = Modifier.background(Color.Gray)) {
-                var imageLoadingResult by remember { mutableStateOf<Result<Painter>?>(null) }
-
-                val painter = rememberAsyncImagePainter(
-                    model = question.flagUrl,
-                    onSuccess = {
-                        imageLoadingResult = Result.success(it.painter)
-                    },
-                    onError = {
-                        it.result.throwable.printStackTrace()
-                        imageLoadingResult = Result.failure(it.result.throwable)
-                    }
-                )
-
-                when(val result = imageLoadingResult) {
-                    null -> CircularProgressIndicator()
-                    else -> {
-                        Image(
-                            painter = if(result.isSuccess) painter else painterResource(Res.drawable.compose_multiplatform),
-                            contentDescription = question.correctAnswer,
-                            modifier = Modifier.size(200.dp),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
+    when {
+        isLoading -> LoadingState()
+        error != null -> ErrorState(error!!)
+        question == null -> EmptyState()
+        else -> QuizContent(
+            question = question,
+            progress = progress,
+            maxProgress = maxProgress,
+            selectedOption = selectedOption,
+            isSubmitted = isSubmitted,
+            isLastQuestion = currentIndex == questions.size - 1,
+            onSelectOption = viewModel::selectOption,
+            onSubmit = viewModel::submitAnswer,
+            onNext = {
+                if (currentIndex == questions.size - 1) {
+                    onQuizComplete()
+                } else {
+                    viewModel.nextQuestion()
                 }
             }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                LinearProgressIndicator(
-                    progress = { progress.toFloat() / maxProgress },
-                    modifier = Modifier.weight(1f),
-                    color = ProgressIndicatorDefaults.linearColor,
-                    trackColor = ProgressIndicatorDefaults.linearTrackColor,
-                    strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
-                )
-
-                Text(
-                    text = "$progress/$maxProgress",
-                    fontSize = 14.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(start = 15.dp)
-                )
-            }
-
-            question.options.forEachIndexed { index, option ->
-                val isSelected = selectedOption == index
-                Text(
-                    text = option,
-                    color = if (isSelected) Color.White else Color(0xFF7A8089),
-                    fontSize = 18.sp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                        .border(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray, MaterialTheme.shapes.medium)
-                        .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.White)
-                        .clickable { viewModel.selectOption(index) }
-                        .padding(15.dp),
-                    textAlign = TextAlign.Start
-                )
-            }
-
-            Button(
-                onClick = {
-                    viewModel.submitAnswer()
-                    if (currentIndex == currentQuestion.size - 1) {
-                        onQuizComplete()
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.White
-                )
-            ) {
-                Text(
-                    text = if (currentIndex == currentQuestion.size - 1) "FINISH" else "SUBMIT",
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
+        )
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun QuizQuestionsScreenPreview() {
-//    MaterialTheme {
-//        QuizQuestionsScreen()
-//    }
-//}
+@Composable
+private fun QuizContent(
+    question: CountryQuestion,
+    progress: Int,
+    maxProgress: Int,
+    selectedOption: Int?,
+    isSubmitted: Boolean,
+    isLastQuestion: Boolean,
+    onSelectOption: (Int) -> Unit,
+    onSubmit: () -> Unit,
+    onNext: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        QuestionText(question.question)
+        FlagImage(question.flagUrl, question.correctAnswer)
+        ProgressSection(progress, maxProgress)
+        OptionsSection(
+            options = question.options,
+            correctAnswer = question.correctAnswer,
+            selectedOption = selectedOption,
+            isSubmitted = isSubmitted,
+            onSelectOption = onSelectOption
+        )
+        ActionButton(
+            isSubmitted = isSubmitted,
+            isLastQuestion = isLastQuestion,
+            selectedOption = selectedOption,
+            onSubmit = onSubmit,
+            onNext = onNext
+        )
+    }
+}
+
+@Composable
+private fun QuestionText(question: String) {
+    Text(
+        text = question,
+        color = Color(0xFF363A43),
+        fontSize = 22.sp,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp)
+    )
+}
+
+@Composable
+private fun ProgressSection(progress: Int, maxProgress: Int) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        LinearProgressIndicator(
+            progress = { progress.toFloat() / maxProgress },
+            modifier = Modifier.weight(1f),
+            color = ProgressIndicatorDefaults.linearColor,
+            trackColor = ProgressIndicatorDefaults.linearTrackColor,
+            strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
+        )
+
+        Text(
+            text = "$progress/$maxProgress",
+            fontSize = 14.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(start = 15.dp)
+        )
+    }
+}
+
+@Composable
+private fun OptionsSection(
+    options: List<String>,
+    correctAnswer: String,
+    selectedOption: Int?,
+    isSubmitted: Boolean,
+    onSelectOption: (Int) -> Unit
+) {
+    options.forEachIndexed { index, option ->
+        val isSelected = selectedOption == index
+        val isCorrect = option == correctAnswer
+        val colors = getOptionColors(isSelected, isCorrect, isSubmitted)
+
+        Text(
+            text = option,
+            color = colors.text,
+            fontSize = 18.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)
+                .border(1.5.dp, colors.border, MaterialTheme.shapes.medium)
+                .background(colors.background, MaterialTheme.shapes.medium)
+                .clickable(enabled = !isSubmitted) { onSelectOption(index) }
+                .padding(15.dp),
+            textAlign = TextAlign.Start
+        )
+    }
+}

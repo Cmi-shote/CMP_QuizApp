@@ -30,6 +30,9 @@ class QuizViewModel(private val countryApiService: CountryApiService) : ViewMode
     private val _name = MutableStateFlow("")
     val name: StateFlow<String> = _name
 
+    private val _isSubmitted = MutableStateFlow(false)
+    val isSubmitted: StateFlow<Boolean> = _isSubmitted
+
     init {
         loadQuestions()
     }
@@ -52,20 +55,26 @@ class QuizViewModel(private val countryApiService: CountryApiService) : ViewMode
     }
 
     fun selectOption(index: Int) {
-        _selectedOption.value = index
+        if (!_isSubmitted.value) _selectedOption.value = index
     }
 
     fun submitAnswer() {
+        if (_selectedOption.value == null) return
+        _isSubmitted.value = true
         if (isAnswerCorrect()) {
             _score.value++
         }
-        nextQuestion()
+        // Removed automatic nextQuestion() call - user must click NEXT button
     }
 
     fun nextQuestion() {
         if (_currentQuestionIndex.value < _questions.value.size - 1) {
             _currentQuestionIndex.value++
             _selectedOption.value = null
+            _isSubmitted.value = false
+        } else {
+            // Last question reached
+            _isSubmitted.value = false
         }
     }
 
@@ -80,7 +89,7 @@ class QuizViewModel(private val countryApiService: CountryApiService) : ViewMode
         val currentQuestion = _questions.value.getOrNull(_currentQuestionIndex.value)
         val selected = _selectedOption.value
         return currentQuestion != null && selected != null &&
-               currentQuestion.options[selected] == currentQuestion.correctAnswer
+                currentQuestion.options[selected] == currentQuestion.correctAnswer
     }
 
     fun getCurrentQuestion(): CountryQuestion? {
